@@ -2,6 +2,49 @@
 
 Terraform module for deploying Azure Key Vault with RBAC authorization, private endpoints, purge protection, HSM keys, certificates, and diagnostic settings.
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Vault["Azure Key Vault"]
+        style Vault fill:#0078D4,color:#fff
+        AccessPolicies["Access Policies / RBAC"]
+        PurgeProtection["Purge Protection"]
+    end
+
+    subgraph StoredItems["Secrets, Keys & Certificates"]
+        style StoredItems fill:#3F8624,color:#fff
+        Secrets["Secrets"]
+        Keys["Keys (RSA / EC / HSM)"]
+        Certificates["Certificates\n(Self-Signed / CA)"]
+    end
+
+    subgraph Networking["Private Networking"]
+        style Networking fill:#DD344C,color:#fff
+        PrivateEndpoint["Private Endpoint"]
+        DNSZone["Private DNS Zone"]
+        NetworkACLs["Network ACLs\n(IP & VNet Rules)"]
+    end
+
+    subgraph Monitoring["Diagnostic Settings"]
+        style Monitoring fill:#FF9900,color:#fff
+        LogAnalytics["Log Analytics Workspace"]
+    end
+
+    subgraph Security["Security"]
+        style Security fill:#8C4FFF,color:#fff
+        RBAC["RBAC Role Assignments"]
+        RotationPolicy["Key Rotation Policy"]
+    end
+
+    Vault --> StoredItems
+    Vault --> Networking
+    Vault --> Monitoring
+    Vault --> Security
+    PrivateEndpoint --> DNSZone
+    AccessPolicies --> StoredItems
+```
+
 ## Features
 
 - Azure Key Vault with configurable SKU (standard/premium)
