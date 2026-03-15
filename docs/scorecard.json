@@ -1,0 +1,64 @@
+{
+  "repo": "terraform-azure-key-vault",
+  "generated": "2026-03-15",
+  "scores": {
+    "documentation": 6,
+    "maintainability": 8,
+    "security": 8,
+    "observability": 5,
+    "deployability": 8,
+    "portability": 6,
+    "testability": 7,
+    "scalability": 7,
+    "reusability": 7,
+    "production_readiness": 7
+  },
+  "overall": 6.9,
+  "top_gaps": [
+    "No .gitignore file present",
+    "Example directories lack README files",
+    "No sub-modules for composability (monolithic structure)",
+    "No pre-commit hook configuration",
+    "Tests exist but lack integration/end-to-end coverage",
+    "No Makefile or Taskfile for local development",
+    "No architecture diagram in documentation",
+    "No cost estimation or Infracost integration",
+    "No automated security scanning (tfsec/checkov) in CI",
+    "No key rotation automation examples"
+  ],
+  "fixes_applied": [
+    "GitHub Actions CI workflow configured",
+    "Test infrastructure present (tests/ directory)",
+    "CONTRIBUTING.md present for contributor guidance",
+    "SECURITY.md present for vulnerability reporting",
+    "CODEOWNERS file established for review ownership",
+    ".editorconfig ensures consistent code formatting",
+    ".gitattributes for line ending normalization",
+    "LICENSE clearly defined",
+    "CHANGELOG.md tracks version history",
+    "Three example configurations (basic, advanced, complete)"
+  ],
+  "remaining_risks": [
+    "Missing .gitignore could lead to sensitive files being committed",
+    "Example directories lack README documentation",
+    "No key rotation automation documented",
+    "No disaster recovery configuration examples"
+  ],
+  "roadmap": {
+    "30_day": [
+      "Create .gitignore with Terraform-standard exclusions",
+      "Add README files to all example directories",
+      "Add pre-commit hooks configuration"
+    ],
+    "60_day": [
+      "Add key rotation automation examples",
+      "Add Terratest integration tests with assertions",
+      "Add tfsec and checkov to CI pipeline"
+    ],
+    "90_day": [
+      "Add disaster recovery configuration example",
+      "Create architecture diagram in README",
+      "Add automated secret expiration monitoring"
+    ]
+  }
+}

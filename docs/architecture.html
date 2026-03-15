@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture -- terraform-azure-key-vault</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0c0b;color:#f5f2eb;font-family:'SF Mono','Cascadia Code','Fira Code',monospace;line-height:1.7;padding:0}
+a{color:#c8420a;text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+h1,h2,h3{color:#f5f2eb;margin-bottom:1rem}
+h1{font-size:2rem;border-bottom:3px solid #c8420a;padding-bottom:.5rem;margin-bottom:2rem}
+h2{font-size:1.4rem;border-bottom:1px solid #333;padding-bottom:.4rem;margin-top:2.5rem}
+h3{font-size:1.1rem;color:#c8420a}
+.badge{display:inline-block;background:#0078d4;color:#fff;padding:4px 14px;border-radius:4px;font-size:.75rem;font-weight:700;margin-right:8px;letter-spacing:.5px}
+.badge-accent{background:#c8420a}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+.card{background:#161816;border:1px solid #222;border-radius:8px;padding:1.2rem}
+.card h3{margin-bottom:.5rem;font-size:.95rem}
+.card p{font-size:.82rem;color:#bbb}
+.card .num{font-size:1.8rem;color:#c8420a;font-weight:700}
+.arch-diagram{background:#121312;border:1px solid #333;border-radius:8px;padding:2rem;margin:1.5rem 0;overflow-x:auto}
+.box{background:#1a1b1a;border:2px solid #c8420a;border-radius:6px;padding:.7rem 1.2rem;text-align:center;font-size:.8rem;min-width:110px;display:inline-block}
+.box.blue{border-color:#0078d4;color:#7ec8f0}
+.box.green{border-color:#3f8624;color:#7fba00}
+.box.red{border-color:#dd344c;color:#ff6b7a}
+.box.purple{border-color:#8c4fff;color:#b4a0ff}
+.box.orange{border-color:#ff9900;color:#ffb84d}
+.arrow{color:#555;font-size:1.2rem}
+.table-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:#1a1b1a;color:#c8420a;text-align:left;padding:.6rem .8rem;border-bottom:2px solid #333}
+td{padding:.5rem .8rem;border-bottom:1px solid #1e1f1e}
+tr:hover td{background:#161816}
+.checklist{list-style:none;padding:0}
+.checklist li{padding:.4rem 0;font-size:.85rem}
+.checklist li::before{content:"[ ] ";color:#c8420a;font-weight:700}
+.checklist li.done::before{content:"[x] ";color:#3f8624}
+code{background:#1a1b1a;padding:2px 6px;border-radius:3px;font-size:.82rem}
+pre{background:#121312;border:1px solid #333;border-radius:6px;padding:1rem;overflow-x:auto;font-size:.8rem;margin:1rem 0}
+.section{margin:2rem 0}
+.footer{border-top:1px solid #333;padding-top:1.5rem;margin-top:3rem;text-align:center;font-size:.75rem;color:#666}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+.flow-row{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.5rem 0;flex-wrap:wrap}
+.flow-col{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div style="margin-bottom:1rem">
+<span class="badge">Microsoft Azure</span>
+<span class="badge badge-accent">Terraform Module</span>
+<span class="badge" style="background:#333">v1.0</span>
+</div>
+
+<h1>terraform-azure-key-vault</h1>
+
+<div class="section">
+<h2>Executive Summary</h2>
+<p>Terraform module for deploying Azure Key Vault with RBAC authorization, private endpoint integration, purge protection, HSM-backed keys with automatic rotation policies, secret and certificate management, network ACLs, and diagnostic settings. Designed for enterprise secrets management with zero-trust networking by default.</p>
+</div>
+
+<div class="section">
+<h2>Overview</h2>
+<div class="cards">
+<div class="card"><div class="num">7</div><h3>Resources</h3><p>Key Vault, Keys, Secrets, Certs, RBAC, Private Endpoint, Diagnostics</p></div>
+<div class="card"><div class="num">18</div><h3>Variables</h3><p>Configurable input parameters</p></div>
+<div class="card"><div class="num">13</div><h3>Outputs</h3><p>IDs, URIs, versions, private endpoint info</p></div>
+<div class="card"><div class="num">3</div><h3>Examples</h3><p>Basic, Advanced, Complete</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Architecture Diagram</h2>
+<div class="arch-diagram">
+<div class="flow-col">
+<div class="flow-row">
+<div class="box blue" style="min-width:200px">Azure Key Vault<br><small>Standard / Premium SKU</small></div>
+</div>
+<div class="arrow" style="display:block;text-align:center">|</div>
+<div class="flow-row">
+<div style="border:2px solid #3f8624;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#7fba00;font-weight:700;text-align:center;margin-bottom:.5rem">Stored Items</div>
+<div class="flow-row">
+<div class="box green">Keys<br><small>RSA / EC / HSM</small></div>
+<div class="box green">Secrets</div>
+<div class="box green">Certificates<br><small>Self-Signed / CA</small></div>
+</div>
+</div>
+</div>
+<div class="flow-row">
+<div style="border:2px solid #8c4fff;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#b4a0ff;font-weight:700;text-align:center;margin-bottom:.5rem">Security</div>
+<div class="flow-row">
+<div class="box purple">RBAC Roles</div>
+<div class="box purple">Key Rotation<br>Policy</div>
+<div class="box purple">Purge Protection<br>90-day Soft Delete</div>
+</div>
+</div>
+</div>
+<div class="flow-row">
+<div style="border:2px solid #dd344c;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#ff6b7a;font-weight:700;text-align:center;margin-bottom:.5rem">Networking</div>
+<div class="flow-row">
+<div class="box red">Private Endpoint</div>
+<div class="box red">Private DNS Zone</div>
+<div class="box red">Network ACLs<br><small>IP + VNet Rules</small></div>
+</div>
+</div>
+</div>
+<div class="flow-row">
+<div class="box orange">Diagnostic Settings &rarr; Log Analytics</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Component Breakdown</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Resource</th><th>Purpose</th></tr>
+<tr><td><code>azurerm_key_vault</code></td><td>Core vault with SKU, RBAC, purge protection, soft delete, network ACLs</td></tr>
+<tr><td><code>azurerm_key_vault_key</code></td><td>Cryptographic keys (RSA/EC/HSM) with automatic rotation policies</td></tr>
+<tr><td><code>azurerm_key_vault_secret</code></td><td>Secrets with content types and expiration dates</td></tr>
+<tr><td><code>azurerm_key_vault_certificate</code></td><td>X.509 certificates with auto-renewal lifecycle actions</td></tr>
+<tr><td><code>azurerm_role_assignment</code></td><td>RBAC role assignments scoped to the Key Vault</td></tr>
+<tr><td><code>azurerm_private_endpoint</code></td><td>Private endpoint with DNS zone group for vault subresource</td></tr>
+<tr><td><code>azurerm_monitor_diagnostic_setting</code></td><td>Log and metric export to Log Analytics workspace</td></tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>Data Flow</h2>
+<div class="arch-diagram">
+<div class="flow-row">
+<div class="box purple">Application / Service</div>
+<div class="arrow">&rarr;</div>
+<div class="box red">Private Endpoint</div>
+<div class="arrow">&rarr;</div>
+<div class="box blue">Key Vault</div>
+<div class="arrow">&rarr;</div>
+<div class="box green">Keys / Secrets / Certs</div>
+</div>
+</div>
+<p style="font-size:.85rem;color:#bbb;margin-top:.5rem"><strong>1.</strong> Applications authenticate via Azure AD (Managed Identity / Service Principal). <strong>2.</strong> Traffic flows through private endpoint within the VNet. <strong>3.</strong> RBAC authorization validates permissions on the vault scope. <strong>4.</strong> Key Vault returns secrets/keys/certificates. <strong>5.</strong> All operations logged to Log Analytics via diagnostic settings.</p>
+</div>
+
+<div class="section">
+<h2>Security Controls</h2>
+<div class="grid-2">
+<div class="card">
+<h3>Access Control</h3>
+<p>- RBAC authorization enabled by default<br>- Role assignments scoped to vault<br>- Azure AD authentication required<br>- Public network access disabled by default</p>
+</div>
+<div class="card">
+<h3>Data Protection</h3>
+<p>- Purge protection enabled (default)<br>- 90-day soft delete retention<br>- HSM-backed keys (Premium SKU)<br>- Automatic key rotation policies<br>- Certificate auto-renewal (30-day trigger)</p>
+</div>
+<div class="card">
+<h3>Network Security</h3>
+<p>- Private endpoint for VNet-isolated access<br>- Private DNS zone integration<br>- Network ACLs with IP and VNet rules<br>- Azure Services bypass option</p>
+</div>
+<div class="card">
+<h3>Monitoring</h3>
+<p>- Diagnostic logs (AuditEvent, AllMetrics)<br>- Log Analytics workspace integration<br>- Key access and modification tracking</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Industry Adaptation</h2>
+<div class="cards">
+<div class="card"><h3>Financial Services</h3><p>Premium SKU with HSM-backed keys, strict RBAC, private endpoint only, 90-day soft delete retention</p></div>
+<div class="card"><h3>Healthcare</h3><p>HIPAA-compliant secrets management, key rotation policies, full audit logging, no public network access</p></div>
+<div class="card"><h3>SaaS Platforms</h3><p>Per-environment vaults, certificate management for custom domains, managed identity integration</p></div>
+<div class="card"><h3>Government</h3><p>Purge protection mandatory, HSM key storage, network ACL enforcement, diagnostic logging to SIEM</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Production Readiness Checklist</h2>
+<ul class="checklist">
+<li class="done">RBAC authorization enabled (no access policies)</li>
+<li class="done">Purge protection enabled with 90-day soft delete</li>
+<li class="done">Public network access disabled</li>
+<li class="done">Private endpoint with DNS zone integration</li>
+<li class="done">Diagnostic settings enabled</li>
+<li class="done">Key rotation policies configured</li>
+<li>Assign least-privilege RBAC roles to consumers</li>
+<li>Configure network ACL IP/VNet allowlists</li>
+<li>Set certificate expiration alerts</li>
+<li>Validate backup and recovery procedures</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Configuration Reference</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Variable</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>name</code></td><td>string</td><td>--</td><td>Key Vault name</td></tr>
+<tr><td><code>sku_name</code></td><td>string</td><td>standard</td><td>standard or premium</td></tr>
+<tr><td><code>enable_rbac_authorization</code></td><td>bool</td><td>true</td><td>Use RBAC instead of access policies</td></tr>
+<tr><td><code>purge_protection_enabled</code></td><td>bool</td><td>true</td><td>Prevent permanent deletion</td></tr>
+<tr><td><code>soft_delete_retention_days</code></td><td>number</td><td>90</td><td>Retention period (7-90 days)</td></tr>
+<tr><td><code>public_network_access_enabled</code></td><td>bool</td><td>false</td><td>Public access toggle</td></tr>
+<tr><td><code>keys</code></td><td>map(object)</td><td>{}</td><td>Keys with rotation policies</td></tr>
+<tr><td><code>secrets</code></td><td>map(object)</td><td>{}</td><td>Secrets with content types</td></tr>
+<tr><td><code>certificates</code></td><td>map(object)</td><td>{}</td><td>Certificates with auto-renewal</td></tr>
+<tr><td><code>enable_private_endpoint</code></td><td>bool</td><td>true</td><td>Create private endpoint</td></tr>
+<tr><td><code>enable_diagnostics</code></td><td>bool</td><td>true</td><td>Enable diagnostic settings</td></tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>Deployment</h2>
+<pre>
+terraform init
+terraform plan -var-file="keyvault.tfvars"
+terraform apply -var-file="keyvault.tfvars"
+
+# Verify vault
+az keyvault show --name kv-myapp-prod
+</pre>
+</div>
+
+<div class="section">
+<h2>Links</h2>
+<p>
+<a href="https://learn.microsoft.com/en-us/azure/key-vault/">Azure Key Vault Documentation</a> |
+<a href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault">Terraform Registry</a> |
+<a href="../examples/basic/">Basic Example</a> |
+<a href="../examples/complete/">Complete Example</a>
+</p>
+</div>
+
+<div class="footer">
+<p>terraform-azure-key-vault &mdash; Architecture Document</p>
+<p>Generated on 2026-03-15 &bull; Terraform &ge; 1.5.0 &bull; AzureRM &ge; 3.80.0</p>
+<p style="margin-top:.5rem"><span class="badge">Microsoft Azure</span> Verified Module Architecture</p>
+</div>
+
+</div>
+</body>
+</html>
