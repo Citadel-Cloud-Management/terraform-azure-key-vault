@@ -1,23 +1,21 @@
-########################################
-# Key Vault
-########################################
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_key_vault" "this" {
-  name                          = var.name
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
-  tenant_id                     = local.tenant_id
-  sku_name                      = var.sku_name
-  enable_rbac_authorization     = var.enable_rbac_authorization
-  purge_protection_enabled      = var.purge_protection_enabled
-  soft_delete_retention_days    = var.soft_delete_retention_days
-  enabled_for_deployment        = var.enabled_for_deployment
-  enabled_for_disk_encryption   = var.enabled_for_disk_encryption
+  name                            = var.name
+  location                        = var.location
+  resource_group_name             = var.resource_group_name
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
+  sku_name                        = var.sku_name
+  enable_rbac_authorization       = var.enable_rbac_authorization
+  purge_protection_enabled        = var.purge_protection_enabled
+  soft_delete_retention_days      = var.soft_delete_retention_days
+  enabled_for_deployment          = var.enabled_for_deployment
+  enabled_for_disk_encryption     = var.enabled_for_disk_encryption
   enabled_for_template_deployment = var.enabled_for_template_deployment
-  public_network_access_enabled = var.public_network_access_enabled
+  public_network_access_enabled   = var.public_network_access_enabled
 
   dynamic "network_acls" {
     for_each = var.network_acls != null ? [var.network_acls] : []
-
     content {
       bypass                     = network_acls.value.bypass
       default_action             = network_acls.value.default_action
@@ -29,9 +27,6 @@ resource "azurerm_key_vault" "this" {
   tags = var.tags
 }
 
-########################################
-# Key Vault Keys (with rotation policy)
-########################################
 resource "azurerm_key_vault_key" "this" {
   for_each = var.keys
 
@@ -43,11 +38,9 @@ resource "azurerm_key_vault_key" "this" {
 
   dynamic "rotation_policy" {
     for_each = each.value.rotation_policy != null ? [each.value.rotation_policy] : []
-
     content {
       dynamic "automatic" {
         for_each = rotation_policy.value.automatic != null ? [rotation_policy.value.automatic] : []
-
         content {
           time_before_expiry  = automatic.value.time_before_expiry
           time_after_creation = automatic.value.time_after_creation
@@ -62,9 +55,6 @@ resource "azurerm_key_vault_key" "this" {
   tags = var.tags
 }
 
-########################################
-# Key Vault Secrets
-########################################
 resource "azurerm_key_vault_secret" "this" {
   for_each = var.secrets
 
@@ -77,9 +67,6 @@ resource "azurerm_key_vault_secret" "this" {
   tags = var.tags
 }
 
-########################################
-# Key Vault Certificates
-########################################
 resource "azurerm_key_vault_certificate" "this" {
   for_each = var.certificates
 
@@ -134,9 +121,6 @@ resource "azurerm_key_vault_certificate" "this" {
   tags = var.tags
 }
 
-########################################
-# RBAC Role Assignments
-########################################
 resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 
@@ -145,9 +129,6 @@ resource "azurerm_role_assignment" "this" {
   principal_id         = each.value.principal_id
 }
 
-########################################
-# Private Endpoint
-########################################
 resource "azurerm_private_endpoint" "this" {
   count = var.enable_private_endpoint ? 1 : 0
 
@@ -165,7 +146,6 @@ resource "azurerm_private_endpoint" "this" {
 
   dynamic "private_dns_zone_group" {
     for_each = var.private_dns_zone_id != null ? [1] : []
-
     content {
       name                 = "default"
       private_dns_zone_ids = [var.private_dns_zone_id]
@@ -175,9 +155,6 @@ resource "azurerm_private_endpoint" "this" {
   tags = var.tags
 }
 
-########################################
-# Diagnostic Settings
-########################################
 resource "azurerm_monitor_diagnostic_setting" "this" {
   count = var.enable_diagnostics ? 1 : 0
 
@@ -185,19 +162,15 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
   target_resource_id         = azurerm_key_vault.this.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  dynamic "enabled_log" {
-    for_each = local.diagnostic_log_categories
-
-    content {
-      category = enabled_log.value
-    }
+  enabled_log {
+    category = "AuditEvent"
   }
 
-  dynamic "metric" {
-    for_each = local.diagnostic_metric_categories
+  enabled_log {
+    category = "AzurePolicyEvaluationDetails"
+  }
 
-    content {
-      category = metric.value
-    }
+  metric {
+    category = "AllMetrics"
   }
 }

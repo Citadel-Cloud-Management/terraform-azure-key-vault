@@ -4,7 +4,7 @@ variable "name" {
 }
 
 variable "resource_group_name" {
-  description = "The name of the resource group in which to create the Key Vault."
+  description = "The name of the resource group for the Key Vault."
   type        = string
 }
 
@@ -14,7 +14,7 @@ variable "location" {
 }
 
 variable "sku_name" {
-  description = "The SKU name of the Key Vault. Possible values are 'standard' and 'premium'."
+  description = "The SKU name of the Key Vault (standard or premium)."
   type        = string
   default     = "standard"
 
@@ -37,7 +37,7 @@ variable "purge_protection_enabled" {
 }
 
 variable "soft_delete_retention_days" {
-  description = "The number of days that items should be retained for once soft-deleted."
+  description = "The number of days to retain soft-deleted items (7-90)."
   type        = number
   default     = 90
 
@@ -48,19 +48,19 @@ variable "soft_delete_retention_days" {
 }
 
 variable "enabled_for_deployment" {
-  description = "Whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets."
+  description = "Whether VMs can retrieve certificates stored as secrets."
   type        = bool
   default     = false
 }
 
 variable "enabled_for_disk_encryption" {
-  description = "Whether Azure Disk Encryption is permitted to retrieve secrets and unwrap keys."
+  description = "Whether Azure Disk Encryption can retrieve secrets and unwrap keys."
   type        = bool
   default     = false
 }
 
 variable "enabled_for_template_deployment" {
-  description = "Whether Azure Resource Manager is permitted to retrieve secrets."
+  description = "Whether Azure Resource Manager can retrieve secrets."
   type        = bool
   default     = false
 }
@@ -90,8 +90,8 @@ variable "keys" {
     key_opts = optional(list(string), ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"])
     rotation_policy = optional(object({
       automatic = optional(object({
-        time_before_expiry          = optional(string)
-        time_after_creation         = optional(string)
+        time_before_expiry  = optional(string)
+        time_after_creation = optional(string)
       }))
       expire_after         = optional(string)
       notify_before_expiry = optional(string)
@@ -114,13 +114,13 @@ variable "secrets" {
 variable "certificates" {
   description = "Map of Key Vault certificates to create."
   type = map(object({
-    issuer      = optional(string, "Self")
-    exportable  = optional(bool, true)
-    key_size    = optional(number, 2048)
-    key_type    = optional(string, "RSA")
-    content_type = optional(string, "application/x-pkcs12")
-    subject     = string
-    dns_names   = optional(list(string), [])
+    issuer             = optional(string, "Self")
+    exportable         = optional(bool, true)
+    key_size           = optional(number, 2048)
+    key_type           = optional(string, "RSA")
+    content_type       = optional(string, "application/x-pkcs12")
+    subject            = string
+    dns_names          = optional(list(string), [])
     validity_in_months = optional(number, 12)
   }))
   default = {}
@@ -166,7 +166,7 @@ variable "log_analytics_workspace_id" {
 }
 
 variable "tags" {
-  description = "A mapping of tags to assign to all resources."
+  description = "Tags to apply to all resources."
   type        = map(string)
   default     = {}
 }
