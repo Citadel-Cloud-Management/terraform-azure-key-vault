@@ -6,7 +6,7 @@ resource "azurerm_key_vault" "this" {
   resource_group_name             = var.resource_group_name
   tenant_id                       = data.azurerm_client_config.current.tenant_id
   sku_name                        = var.sku_name
-  enable_rbac_authorization       = var.enable_rbac_authorization
+  rbac_authorization_enabled      = var.enable_rbac_authorization
   purge_protection_enabled        = var.purge_protection_enabled
   soft_delete_retention_days      = var.soft_delete_retention_days
   enabled_for_deployment          = var.enabled_for_deployment
@@ -56,13 +56,15 @@ resource "azurerm_key_vault_key" "this" {
 }
 
 resource "azurerm_key_vault_secret" "this" {
-  for_each = var.secrets
+  # The map keys (secret names) are not secret; only the values are. Using the
+  # non-sensitive key set as for_each avoids "sensitive value in for_each".
+  for_each = nonsensitive(toset(keys(var.secrets)))
 
   name            = each.key
-  value           = each.value.value
+  value           = var.secrets[each.key].value
   key_vault_id    = azurerm_key_vault.this.id
-  content_type    = each.value.content_type
-  expiration_date = each.value.expiration_date
+  content_type    = var.secrets[each.key].content_type
+  expiration_date = var.secrets[each.key].expiration_date
 
   tags = var.tags
 }
@@ -170,7 +172,7 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
     category = "AzurePolicyEvaluationDetails"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
   }
 }
