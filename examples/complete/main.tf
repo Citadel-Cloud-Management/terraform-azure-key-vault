@@ -29,10 +29,9 @@ resource "azurerm_private_dns_zone" "keyvault" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "keyvault" {
-  name                  = "keyvault-dns-link"
-  resource_group_name   = azurerm_resource_group.example.name
-  private_dns_zone_name = azurerm_private_dns_zone.keyvault.name
-  virtual_network_id    = azurerm_virtual_network.example.id
+  name                = "keyvault-dns-link"
+  private_dns_zone_id = azurerm_private_dns_zone.keyvault.id
+  virtual_network_id  = azurerm_virtual_network.example.id
 }
 
 resource "azurerm_log_analytics_workspace" "example" {
