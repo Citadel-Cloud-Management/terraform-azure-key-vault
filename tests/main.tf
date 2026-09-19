@@ -12,9 +12,9 @@ module "test" {
   resource_group_name = azurerm_resource_group.test.name
   location            = azurerm_resource_group.test.location
 
-  sku_name                  = "standard"
-  enable_rbac_authorization = true
-  purge_protection_enabled  = true
+  sku_name                   = "standard"
+  enable_rbac_authorization  = true
+  purge_protection_enabled   = true
   soft_delete_retention_days = 90
 
   public_network_access_enabled = true
